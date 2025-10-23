@@ -1,0 +1,27 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "Учет заработанных и потраченных средств",
+  "main": "app.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:init": "node ./scripts/init-db.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/easy-deep-learning/finance-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/easy-deep-learning/finance-tracker/issues"
+  },
+  "homepage": "https://github.com/easy-deep-learning/finance-tracker#readme",
+  "dependencies": {
+    "better-sqlite3": "^12.4.1"
+  }
+}

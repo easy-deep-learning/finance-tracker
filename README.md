@@ -17,3 +17,44 @@
 - График платежей/поступлений по долгам
 - Учёт доступных кредитных средств
 - Формирование накоплений
+
+## Backend (SQLite + Google OAuth)
+
+Приложение теперь содержит простой backend на Node.js/Express:
+
+- База данных: SQLite (файлы `data.sqlite` и `sessions.sqlite`).
+- Сессии: `express-session` + `connect-sqlite3`.
+- Авторизация: Google OAuth 2.0 (через `passport-google-oauth20`).
+- API синхронизации состояния:
+  - `GET /api/state` — получить сохранённое состояние для пользователя (требуется вход).
+  - `POST /api/state` — сохранить состояние для пользователя (требуется вход).
+- Текущий пользователь: `GET /me`.
+- Вход: `GET /auth/google`.
+- Выход: `POST /auth/logout`.
+
+### Переменные окружения
+
+Создайте `.env` в корне проекта:
+
+```
+GOOGLE_CLIENT_ID=ваш_client_id
+GOOGLE_CLIENT_SECRET=ваш_client_secret
+SESSION_SECRET=случайная_строка
+# Базовый URL вашего сайта, нужен для корректного callback
+BASE_URL=http://localhost:3000
+# Для https продакшна установите COOKIE_SECURE=1
+# COOKIE_SECURE=1
+```
+
+В консоли Google укажите redirect URI: `${BASE_URL}/auth/google/callback`.
+
+### Установка и запуск
+
+```
+npm install
+npm run start
+# или для разработки с перезапуском
+npm run dev
+```
+
+Frontend раздается статически сервером по адресу `http://localhost:3000`.

@@ -1,15 +1,15 @@
 openapi: 3.0.3
 info:
-  title: Finance Tracker API
+  title: API финансового трекера
   version: 1.0.0
   description: |
-    HTTP API for Finance Tracker. Covers authentication, accounts, categories, transactions,
-    budgets, recurring items, debts, credit facilities, saving goals, events, and reports.
+    HTTP API для Finance Tracker. Охватывает аутентификацию, счета, категории, транзакции,
+    бюджеты, регулярные операции, долги, кредитные продукты, цели накоплений, события и отчёты.
 servers:
   - url: https://api.example.com
-    description: Production
+    description: Продакшн
   - url: https://sandbox.api.example.com
-    description: Sandbox
+    description: Песочница
 security:
   - bearerAuth: []
 tags:
@@ -36,22 +36,22 @@ components:
       name: limit
       in: query
       schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
-      description: Max items to return
+      description: Максимум элементов в ответе
     CursorParam:
       name: cursor
       in: query
       schema: { type: string }
-      description: Cursor for next/prev page
+      description: Курсор для следующей/предыдущей страницы
     FromDateParam:
       name: from
       in: query
       schema: { type: string, format: date }
-      description: Start date inclusive
+      description: Начальная дата включительно
     ToDateParam:
       name: to
       in: query
       schema: { type: string, format: date }
-      description: End date inclusive
+      description: Конечная дата включительно
     AccountIdParam:
       name: accountId
       in: query
@@ -64,7 +64,7 @@ components:
       name: sort
       in: query
       schema: { type: string }
-      description: Comma-separated fields e.g. occurredAt:desc,amount:asc
+      description: Поля через запятую, напр. occurredAt:desc,amount:asc
   schemas:
     ErrorResponse:
       type: object
@@ -134,8 +134,8 @@ components:
         categoryId: { type: string, format: uuid, nullable: true }
         fromAccountId: { type: string, format: uuid, nullable: true }
         toAccountId: { type: string, format: uuid, nullable: true }
-        feeAmount: { type: integer, nullable: true, description: Amount in minor units }
-        amount: { type: integer, description: Amount in minor units }
+        feeAmount: { type: integer, nullable: true, description: Сумма в минорных единицах }
+        amount: { type: integer, description: Сумма в минорных единицах }
         currency: { type: string, example: USD }
         occurredAt: { type: string, format: date-time }
         notes: { type: string, nullable: true }
@@ -150,7 +150,7 @@ components:
       required: [categoryId, limitAmount]
       properties:
         categoryId: { type: string, format: uuid }
-        limitAmount: { type: integer, description: Limit in minor units }
+        limitAmount: { type: integer, description: Лимит в минорных единицах }
     Budget:
       type: object
       required: [id, userId, period, startDate]
@@ -181,7 +181,7 @@ components:
         accountId: { type: string, format: uuid }
         amount: { type: integer }
         currency: { type: string, example: USD }
-        schedule: { type: string, description: Cron or RRULE }
+        schedule: { type: string, description: Cron или RRULE }
         nextRunAt: { type: string, format: date-time, nullable: true }
         lastRunAt: { type: string, format: date-time, nullable: true }
         status: { $ref: '#/components/schemas/RecurringItemStatus' }
@@ -254,7 +254,7 @@ paths:
   /auth/register:
     post:
       tags: [Auth]
-      summary: Register a new user
+      summary: Регистрация нового пользователя
       requestBody:
         required: true
         content:
@@ -268,7 +268,7 @@ paths:
                 name: { type: string }
       responses:
         '201':
-          description: Registered
+          description: Зарегистрирован
           content:
             application/json:
               schema:
@@ -276,11 +276,11 @@ paths:
                 properties:
                   user: { $ref: '#/components/schemas/User' }
                   accessToken: { type: string }
-        '400': { description: Bad Request, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
+        '400': { description: Неверный запрос, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
   /auth/login:
     post:
       tags: [Auth]
-      summary: Login and receive access token
+      summary: Вход и получение токена доступа
       requestBody:
         required: true
         content:
@@ -293,7 +293,7 @@ paths:
                 password: { type: string, format: password }
       responses:
         '200':
-          description: Authenticated
+          description: Аутентифицирован
           content:
             application/json:
               schema:
@@ -301,18 +301,18 @@ paths:
                 properties:
                   user: { $ref: '#/components/schemas/User' }
                   accessToken: { type: string }
-        '401': { description: Unauthorized }
+        '401': { description: Неавторизовано }
   /me:
     get:
       tags: [Users]
-      summary: Get current user
+      summary: Получить текущего пользователя
       responses:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
-        '401': { description: Unauthorized }
+        '401': { description: Неавторизовано }
   /accounts:
     get:
       tags: [Accounts]
-      summary: List accounts
+      summary: Список счетов
       parameters:
         - $ref: '#/components/parameters/LimitParam'
         - $ref: '#/components/parameters/CursorParam'
@@ -330,7 +330,7 @@ paths:
                   meta: { $ref: '#/components/schemas/Meta' }
     post:
       tags: [Accounts]
-      summary: Create account
+      summary: Создать счёт
       requestBody:
         required: true
         content:
@@ -343,11 +343,11 @@ paths:
                 type: { $ref: '#/components/schemas/AccountType' }
                 currency: { type: string }
       responses:
-        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Account' } } } }
+        '201': { description: Создано, content: { application/json: { schema: { $ref: '#/components/schemas/Account' } } } }
   /accounts/{id}:
     get:
       tags: [Accounts]
-      summary: Get account
+      summary: Получить счёт
       parameters:
         - name: id
           in: path
@@ -355,10 +355,10 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Account' } } } }
-        '404': { description: Not found }
+        '404': { description: Не найдено }
     patch:
       tags: [Accounts]
-      summary: Update account
+      summary: Обновить счёт
       parameters:
         - name: id
           in: path
@@ -377,32 +377,23 @@ paths:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Account' } } } }
     delete:
       tags: [Accounts]
-      summary: Delete account
+      summary: Удалить счёт
       parameters:
         - name: id
           in: path
           required: true
           schema: { type: string, format: uuid }
       responses:
-        '204': { description: No Content }
+        '204': { description: Нет содержимого }
   /categories:
     get:
       tags: [Categories]
-      summary: List categories
+      summary: Список категорий
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: { $ref: '#/components/schemas/Category' }
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/Category' } } } } } } }
     post:
       tags: [Categories]
-      summary: Create category
+      summary: Создать категорию
       requestBody:
         required: true
         content:
@@ -415,11 +406,11 @@ paths:
                 type: { $ref: '#/components/schemas/CategoryType' }
                 parentId: { type: string, format: uuid }
       responses:
-        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Category' } } } }
+        '201': { description: Создано, content: { application/json: { schema: { $ref: '#/components/schemas/Category' } } } }
   /transactions:
     get:
       tags: [Transactions]
-      summary: List transactions
+      summary: Список транзакций
       parameters:
         - $ref: '#/components/parameters/LimitParam'
         - $ref: '#/components/parameters/CursorParam'
@@ -442,14 +433,14 @@ paths:
                   meta: { $ref: '#/components/schemas/Meta' }
     post:
       tags: [Transactions]
-      summary: Create transaction
+      summary: Создать транзакцию
       requestBody:
         required: true
         content:
           application/json:
             schema:
               oneOf:
-                - title: Income
+                - title: Доход
                   type: object
                   required: [type, accountId, categoryId, amount, currency, occurredAt]
                   properties:
@@ -460,7 +451,7 @@ paths:
                     currency: { type: string }
                     occurredAt: { type: string, format: date-time }
                     notes: { type: string }
-                - title: Expense
+                - title: Расход
                   type: object
                   required: [type, accountId, categoryId, amount, currency, occurredAt]
                   properties:
@@ -471,7 +462,7 @@ paths:
                     currency: { type: string }
                     occurredAt: { type: string, format: date-time }
                     notes: { type: string }
-                - title: Transfer
+                - title: Перевод
                   type: object
                   required: [type, fromAccountId, toAccountId, amount, currency, occurredAt]
                   properties:
@@ -484,25 +475,16 @@ paths:
                     feeAmount: { type: integer }
                     notes: { type: string }
       responses:
-        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Transaction' } } } }
+        '201': { description: Создано, content: { application/json: { schema: { $ref: '#/components/schemas/Transaction' } } } }
   /budgets:
     get:
       tags: [Budgets]
-      summary: List budgets
+      summary: Список бюджетов
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: { $ref: '#/components/schemas/Budget' }
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/Budget' } } } } } } }
     post:
       tags: [Budgets]
-      summary: Create budget
+      summary: Создать бюджет
       requestBody:
         required: true
         content:
@@ -519,16 +501,16 @@ paths:
                   items: { $ref: '#/components/schemas/BudgetAllocation' }
                 rollover: { type: boolean }
       responses:
-        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Budget' } } } }
+        '201': { description: Создано, content: { application/json: { schema: { $ref: '#/components/schemas/Budget' } } } }
   /recurring:
     get:
       tags: [Recurring]
-      summary: List recurring items
+      summary: Список регулярных операций
       responses:
         '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/RecurringItem' } } } } } } }
     post:
       tags: [Recurring]
-      summary: Create recurring income/expense
+      summary: Создать регулярный доход/расход
       requestBody:
         required: true
         content:
@@ -544,11 +526,11 @@ paths:
                 currency: { type: string }
                 schedule: { type: string }
       responses:
-        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/RecurringItem' } } } }
+        '201': { description: Создано, content: { application/json: { schema: { $ref: '#/components/schemas/RecurringItem' } } } }
   /recurring/{id}/run:
     post:
       tags: [Recurring]
-      summary: Trigger generation now (idempotent)
+      summary: Выполнить генерацию сейчас (идемпотентно)
       parameters:
         - name: id
           in: path
@@ -559,12 +541,12 @@ paths:
   /debts:
     get:
       tags: [Debts]
-      summary: List debts
+      summary: Список долгов
       responses:
         '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/Debt' } } } } } } }
     post:
       tags: [Debts]
-      summary: Create debt
+      summary: Создать долг
       requestBody:
         required: true
         content:
@@ -581,11 +563,11 @@ paths:
                 dueDate: { type: string, format: date }
                 schedule: { type: string, example: monthly }
       responses:
-        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Debt' } } } }
+        '201': { description: Создано, content: { application/json: { schema: { $ref: '#/components/schemas/Debt' } } } }
   /debts/{id}:
     get:
       tags: [Debts]
-      summary: Get debt
+      summary: Получить долг
       parameters:
         - name: id
           in: path
@@ -595,7 +577,7 @@ paths:
         '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Debt' } } } }
     patch:
       tags: [Debts]
-      summary: Update debt
+      summary: Обновить долг
       parameters:
         - name: id
           in: path
@@ -614,7 +596,7 @@ paths:
   /debts/{id}/payments:
     get:
       tags: [Debts]
-      summary: List payments for a debt
+      summary: Список платежей по долгу
       parameters:
         - name: id
           in: path
@@ -624,7 +606,7 @@ paths:
         '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/DebtPayment' } } } } } } }
     post:
       tags: [Debts]
-      summary: Add a payment
+      summary: Добавить платёж
       parameters:
         - name: id
           in: path
@@ -641,16 +623,16 @@ paths:
                 amount: { type: integer }
                 occurredAt: { type: string, format: date-time }
       responses:
-        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/DebtPayment' } } } }
+        '201': { description: Создано, content: { application/json: { schema: { $ref: '#/components/schemas/DebtPayment' } } } }
   /credit-facilities:
     get:
       tags: [Credit]
-      summary: List credit facilities
+      summary: Список кредитных продуктов
       responses:
         '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/CreditFacility' } } } } } } }
     post:
       tags: [Credit]
-      summary: Create credit facility
+      summary: Создать кредитный продукт
       requestBody:
         required: true
         content:
@@ -665,16 +647,16 @@ paths:
                 statementDay: { type: integer }
                 paymentDueDay: { type: integer }
       responses:
-        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/CreditFacility' } } } }
+        '201': { description: Создано, content: { application/json: { schema: { $ref: '#/components/schemas/CreditFacility' } } } }
   /saving-goals:
     get:
       tags: [Savings]
-      summary: List saving goals
+      summary: Список целей накоплений
       responses:
         '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/SavingGoal' } } } } } } }
     post:
       tags: [Savings]
-      summary: Create saving goal
+      summary: Создать цель накоплений
       requestBody:
         required: true
         content:
@@ -687,16 +669,16 @@ paths:
                 targetAmount: { type: integer }
                 dueDate: { type: string, format: date }
       responses:
-        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/SavingGoal' } } } }
+        '201': { description: Создано, content: { application/json: { schema: { $ref: '#/components/schemas/SavingGoal' } } } }
   /events:
     get:
       tags: [Events]
-      summary: List events
+      summary: Список событий
       responses:
         '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/Event' } } } } } } }
     post:
       tags: [Events]
-      summary: Create event
+      summary: Создать событие
       requestBody:
         required: true
         content:
@@ -710,11 +692,11 @@ paths:
                 expectedSpendAmount: { type: integer }
                 notes: { type: string }
       responses:
-        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Event' } } } }
+        '201': { description: Создано, content: { application/json: { schema: { $ref: '#/components/schemas/Event' } } } }
   /reports/cashflow:
     get:
       tags: [Reports]
-      summary: Cashflow by day and category
+      summary: Денежный поток по дням и категориям
       parameters:
         - $ref: '#/components/parameters/FromDateParam'
         - $ref: '#/components/parameters/ToDateParam'
@@ -745,7 +727,7 @@ paths:
   /reports/budget-performance:
     get:
       tags: [Reports]
-      summary: Budget allocations vs actuals
+      summary: Бюджетные распределения и фактические значения
       parameters:
         - name: budgetId
           in: query

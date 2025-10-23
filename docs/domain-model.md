@@ -1,8 +1,8 @@
-# Domain model
+# Доменная модель
 
-The system revolves around financial events recorded by users, categorized for analysis and planning.
+Система вращается вокруг финансовых событий, фиксируемых пользователями и категоризируемых для анализа и планирования.
 
-## Entities
+## Сущности
 
 - User
   - id, email, name, defaultCurrency, createdAt
@@ -12,11 +12,11 @@ The system revolves around financial events recorded by users, categorized for a
   - id, userId, name, type (income|expense), parentId?, color?, archived
 - Transaction
   - id, userId, accountId, categoryId?, type (income|expense|transfer), amount, currency, occurredAt, notes?, tags[]
-  - For transfer: fromAccountId, toAccountId, feeAmount?
+  - Для переводов: fromAccountId, toAccountId, feeAmount?
 - Budget
   - id, userId, period (monthly|weekly|custom), startDate, endDate, allocations[{categoryId, limitAmount}], rollover (bool)
 - RecurringItem
-  - id, userId, type (income|expense), categoryId, accountId, amount, currency, schedule (cron or RRULE), nextRunAt, lastRunAt, status
+  - id, userId, type (income|expense), categoryId, accountId, amount, currency, schedule (cron или RRULE), nextRunAt, lastRunAt, status
 - Debt
   - id, userId, role (lent|borrowed), counterparty, principal, interestRateAPR, startDate, dueDate?, schedule (monthly|custom), status
   - payments[]: {id, amount, occurredAt, interestPortion, principalPortion}
@@ -27,7 +27,7 @@ The system revolves around financial events recorded by users, categorized for a
 - Event
   - id, userId, name, date, expectedSpendAmount?, notes?
 
-## Relationships
+## Связи
 - User 1..* Account
 - User 1..* Category
 - User 1..* Transaction
@@ -38,14 +38,14 @@ The system revolves around financial events recorded by users, categorized for a
 - User 1..* SavingGoal
 - User 1..* Event
 
-## Invariants and notes
-- All monetary values are stored in minor units (e.g., cents) to avoid FP errors.
-- Currency on `Transaction` must match `Account.currency` unless a conversion step is introduced.
-- `Transaction.categoryId` is optional for transfers.
-- `Budget.allocations` categories must be `type=expense`.
-- `RecurringItem` generation is idempotent per period.
+## Инварианты и примечания
+- Все денежные значения хранятся в минорных единицах (например, копейки), чтобы избежать FP‑ошибок.
+- Валюта `Transaction` должна совпадать с `Account.currency`, если не введён шаг конвертации.
+- `Transaction.categoryId` необязателен для переводов.
+- Категории в `Budget.allocations` должны иметь `type=expense`.
+- Генерация `RecurringItem` идемпотентна на период.
 
-## Diagram
+## Диаграмма
 ```mermaid
 classDiagram
   class User {

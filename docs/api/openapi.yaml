@@ -1,0 +1,776 @@
+openapi: 3.0.3
+info:
+  title: Finance Tracker API
+  version: 1.0.0
+  description: |
+    HTTP API for Finance Tracker. Covers authentication, accounts, categories, transactions,
+    budgets, recurring items, debts, credit facilities, saving goals, events, and reports.
+servers:
+  - url: https://api.example.com
+    description: Production
+  - url: https://sandbox.api.example.com
+    description: Sandbox
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Users
+  - name: Accounts
+  - name: Categories
+  - name: Transactions
+  - name: Budgets
+  - name: Recurring
+  - name: Debts
+  - name: Credit
+  - name: Savings
+  - name: Events
+  - name: Reports
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    LimitParam:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      description: Max items to return
+    CursorParam:
+      name: cursor
+      in: query
+      schema: { type: string }
+      description: Cursor for next/prev page
+    FromDateParam:
+      name: from
+      in: query
+      schema: { type: string, format: date }
+      description: Start date inclusive
+    ToDateParam:
+      name: to
+      in: query
+      schema: { type: string, format: date }
+      description: End date inclusive
+    AccountIdParam:
+      name: accountId
+      in: query
+      schema: { type: string, format: uuid }
+    CategoryIdParam:
+      name: categoryId
+      in: query
+      schema: { type: string, format: uuid }
+    SortParam:
+      name: sort
+      in: query
+      schema: { type: string }
+      description: Comma-separated fields e.g. occurredAt:desc,amount:asc
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: { type: object, additionalProperties: true }
+    Meta:
+      type: object
+      properties:
+        nextCursor: { type: string, nullable: true }
+        prevCursor: { type: string, nullable: true }
+        total: { type: integer, nullable: true }
+    User:
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string }
+        defaultCurrency: { type: string, example: USD }
+        createdAt: { type: string, format: date-time }
+    AccountType:
+      type: string
+      enum: [cash, bank, card, investment]
+    Account:
+      type: object
+      required: [id, userId, name, type, currency]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        name: { type: string }
+        type: { $ref: '#/components/schemas/AccountType' }
+        currency: { type: string, example: USD }
+        createdAt: { type: string, format: date-time }
+        archived: { type: boolean, default: false }
+    CategoryType:
+      type: string
+      enum: [income, expense]
+    Category:
+      type: object
+      required: [id, userId, name, type]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        name: { type: string }
+        type: { $ref: '#/components/schemas/CategoryType' }
+        parentId: { type: string, format: uuid, nullable: true }
+        color: { type: string, nullable: true }
+        archived: { type: boolean, default: false }
+    TransactionType:
+      type: string
+      enum: [income, expense, transfer]
+    Transaction:
+      type: object
+      required: [id, userId, type, amount, currency, occurredAt]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        type: { $ref: '#/components/schemas/TransactionType' }
+        accountId: { type: string, format: uuid, nullable: true }
+        categoryId: { type: string, format: uuid, nullable: true }
+        fromAccountId: { type: string, format: uuid, nullable: true }
+        toAccountId: { type: string, format: uuid, nullable: true }
+        feeAmount: { type: integer, nullable: true, description: Amount in minor units }
+        amount: { type: integer, description: Amount in minor units }
+        currency: { type: string, example: USD }
+        occurredAt: { type: string, format: date-time }
+        notes: { type: string, nullable: true }
+        tags:
+          type: array
+          items: { type: string }
+    BudgetPeriod:
+      type: string
+      enum: [monthly, weekly, custom]
+    BudgetAllocation:
+      type: object
+      required: [categoryId, limitAmount]
+      properties:
+        categoryId: { type: string, format: uuid }
+        limitAmount: { type: integer, description: Limit in minor units }
+    Budget:
+      type: object
+      required: [id, userId, period, startDate]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        period: { $ref: '#/components/schemas/BudgetPeriod' }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date, nullable: true }
+        allocations:
+          type: array
+          items: { $ref: '#/components/schemas/BudgetAllocation' }
+        rollover: { type: boolean, default: false }
+    RecurringType:
+      type: string
+      enum: [income, expense]
+    RecurringItemStatus:
+      type: string
+      enum: [active, paused]
+    RecurringItem:
+      type: object
+      required: [id, userId, type, categoryId, accountId, amount, currency, schedule]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        type: { $ref: '#/components/schemas/RecurringType' }
+        categoryId: { type: string, format: uuid }
+        accountId: { type: string, format: uuid }
+        amount: { type: integer }
+        currency: { type: string, example: USD }
+        schedule: { type: string, description: Cron or RRULE }
+        nextRunAt: { type: string, format: date-time, nullable: true }
+        lastRunAt: { type: string, format: date-time, nullable: true }
+        status: { $ref: '#/components/schemas/RecurringItemStatus' }
+    DebtRole:
+      type: string
+      enum: [lent, borrowed]
+    DebtStatus:
+      type: string
+      enum: [active, closed, defaulted]
+    DebtPayment:
+      type: object
+      required: [id, amount, occurredAt]
+      properties:
+        id: { type: string, format: uuid }
+        amount: { type: integer }
+        occurredAt: { type: string, format: date-time }
+        interestPortion: { type: integer, nullable: true }
+        principalPortion: { type: integer, nullable: true }
+    Debt:
+      type: object
+      required: [id, userId, role, principal, startDate]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        role: { $ref: '#/components/schemas/DebtRole' }
+        counterparty: { type: string, nullable: true }
+        principal: { type: integer }
+        interestRateAPR: { type: number, format: float, example: 15.99 }
+        startDate: { type: string, format: date }
+        dueDate: { type: string, format: date, nullable: true }
+        schedule: { type: string, example: monthly }
+        status: { $ref: '#/components/schemas/DebtStatus' }
+        payments:
+          type: array
+          items: { $ref: '#/components/schemas/DebtPayment' }
+    CreditFacility:
+      type: object
+      required: [id, userId, name, limitAmount]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        name: { type: string }
+        limitAmount: { type: integer }
+        availableAmount: { type: integer }
+        apr: { type: number, format: float }
+        statementDay: { type: integer, minimum: 1, maximum: 31 }
+        paymentDueDay: { type: integer, minimum: 1, maximum: 31 }
+    SavingGoal:
+      type: object
+      required: [id, userId, name, targetAmount]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        name: { type: string }
+        targetAmount: { type: integer }
+        currentAmount: { type: integer }
+        dueDate: { type: string, format: date, nullable: true }
+        priority: { type: integer, nullable: true }
+    Event:
+      type: object
+      required: [id, userId, name, date]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        name: { type: string }
+        date: { type: string, format: date }
+        expectedSpendAmount: { type: integer, nullable: true }
+        notes: { type: string, nullable: true }
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+                name: { type: string }
+      responses:
+        '201':
+          description: Registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+                  accessToken: { type: string }
+        '400': { description: Bad Request, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login and receive access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+                  accessToken: { type: string }
+        '401': { description: Unauthorized }
+  /me:
+    get:
+      tags: [Users]
+      summary: Get current user
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        '401': { description: Unauthorized }
+  /accounts:
+    get:
+      tags: [Accounts]
+      summary: List accounts
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/CursorParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Account' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [Accounts]
+      summary: Create account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, type, currency]
+              properties:
+                name: { type: string }
+                type: { $ref: '#/components/schemas/AccountType' }
+                currency: { type: string }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Account' } } } }
+  /accounts/{id}:
+    get:
+      tags: [Accounts]
+      summary: Get account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Account' } } } }
+        '404': { description: Not found }
+    patch:
+      tags: [Accounts]
+      summary: Update account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                archived: { type: boolean }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Account' } } } }
+    delete:
+      tags: [Accounts]
+      summary: Delete account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: No Content }
+  /categories:
+    get:
+      tags: [Categories]
+      summary: List categories
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Category' }
+    post:
+      tags: [Categories]
+      summary: Create category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, type]
+              properties:
+                name: { type: string }
+                type: { $ref: '#/components/schemas/CategoryType' }
+                parentId: { type: string, format: uuid }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Category' } } } }
+  /transactions:
+    get:
+      tags: [Transactions]
+      summary: List transactions
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/FromDateParam'
+        - $ref: '#/components/parameters/ToDateParam'
+        - $ref: '#/components/parameters/AccountIdParam'
+        - $ref: '#/components/parameters/CategoryIdParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Transaction' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+    post:
+      tags: [Transactions]
+      summary: Create transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - title: Income
+                  type: object
+                  required: [type, accountId, categoryId, amount, currency, occurredAt]
+                  properties:
+                    type: { enum: [income] }
+                    accountId: { type: string, format: uuid }
+                    categoryId: { type: string, format: uuid }
+                    amount: { type: integer }
+                    currency: { type: string }
+                    occurredAt: { type: string, format: date-time }
+                    notes: { type: string }
+                - title: Expense
+                  type: object
+                  required: [type, accountId, categoryId, amount, currency, occurredAt]
+                  properties:
+                    type: { enum: [expense] }
+                    accountId: { type: string, format: uuid }
+                    categoryId: { type: string, format: uuid }
+                    amount: { type: integer }
+                    currency: { type: string }
+                    occurredAt: { type: string, format: date-time }
+                    notes: { type: string }
+                - title: Transfer
+                  type: object
+                  required: [type, fromAccountId, toAccountId, amount, currency, occurredAt]
+                  properties:
+                    type: { enum: [transfer] }
+                    fromAccountId: { type: string, format: uuid }
+                    toAccountId: { type: string, format: uuid }
+                    amount: { type: integer }
+                    currency: { type: string }
+                    occurredAt: { type: string, format: date-time }
+                    feeAmount: { type: integer }
+                    notes: { type: string }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Transaction' } } } }
+  /budgets:
+    get:
+      tags: [Budgets]
+      summary: List budgets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Budget' }
+    post:
+      tags: [Budgets]
+      summary: Create budget
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [period, startDate, allocations]
+              properties:
+                period: { $ref: '#/components/schemas/BudgetPeriod' }
+                startDate: { type: string, format: date }
+                endDate: { type: string, format: date }
+                allocations:
+                  type: array
+                  items: { $ref: '#/components/schemas/BudgetAllocation' }
+                rollover: { type: boolean }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Budget' } } } }
+  /recurring:
+    get:
+      tags: [Recurring]
+      summary: List recurring items
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/RecurringItem' } } } } } } }
+    post:
+      tags: [Recurring]
+      summary: Create recurring income/expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, categoryId, accountId, amount, currency, schedule]
+              properties:
+                type: { $ref: '#/components/schemas/RecurringType' }
+                categoryId: { type: string, format: uuid }
+                accountId: { type: string, format: uuid }
+                amount: { type: integer }
+                currency: { type: string }
+                schedule: { type: string }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/RecurringItem' } } } }
+  /recurring/{id}/run:
+    post:
+      tags: [Recurring]
+      summary: Trigger generation now (idempotent)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { createdTransactions: { type: array, items: { $ref: '#/components/schemas/Transaction' } } } } } } }
+  /debts:
+    get:
+      tags: [Debts]
+      summary: List debts
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/Debt' } } } } } } }
+    post:
+      tags: [Debts]
+      summary: Create debt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role, principal, interestRateAPR, startDate]
+              properties:
+                role: { $ref: '#/components/schemas/DebtRole' }
+                counterparty: { type: string }
+                principal: { type: integer }
+                interestRateAPR: { type: number, format: float }
+                startDate: { type: string, format: date }
+                dueDate: { type: string, format: date }
+                schedule: { type: string, example: monthly }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Debt' } } } }
+  /debts/{id}:
+    get:
+      tags: [Debts]
+      summary: Get debt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Debt' } } } }
+    patch:
+      tags: [Debts]
+      summary: Update debt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { $ref: '#/components/schemas/DebtStatus' }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Debt' } } } }
+  /debts/{id}/payments:
+    get:
+      tags: [Debts]
+      summary: List payments for a debt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/DebtPayment' } } } } } } }
+    post:
+      tags: [Debts]
+      summary: Add a payment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, occurredAt]
+              properties:
+                amount: { type: integer }
+                occurredAt: { type: string, format: date-time }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/DebtPayment' } } } }
+  /credit-facilities:
+    get:
+      tags: [Credit]
+      summary: List credit facilities
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/CreditFacility' } } } } } } }
+    post:
+      tags: [Credit]
+      summary: Create credit facility
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, limitAmount]
+              properties:
+                name: { type: string }
+                limitAmount: { type: integer }
+                apr: { type: number, format: float }
+                statementDay: { type: integer }
+                paymentDueDay: { type: integer }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/CreditFacility' } } } }
+  /saving-goals:
+    get:
+      tags: [Savings]
+      summary: List saving goals
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/SavingGoal' } } } } } } }
+    post:
+      tags: [Savings]
+      summary: Create saving goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, targetAmount]
+              properties:
+                name: { type: string }
+                targetAmount: { type: integer }
+                dueDate: { type: string, format: date }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/SavingGoal' } } } }
+  /events:
+    get:
+      tags: [Events]
+      summary: List events
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/Event' } } } } } } }
+    post:
+      tags: [Events]
+      summary: Create event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, date]
+              properties:
+                name: { type: string }
+                date: { type: string, format: date }
+                expectedSpendAmount: { type: integer }
+                notes: { type: string }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Event' } } } }
+  /reports/cashflow:
+    get:
+      tags: [Reports]
+      summary: Cashflow by day and category
+      parameters:
+        - $ref: '#/components/parameters/FromDateParam'
+        - $ref: '#/components/parameters/ToDateParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  byDay:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date: { type: string, format: date }
+                        income: { type: integer }
+                        expense: { type: integer }
+                  byCategory:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        categoryId: { type: string, format: uuid }
+                        income: { type: integer }
+                        expense: { type: integer }
+  /reports/budget-performance:
+    get:
+      tags: [Reports]
+      summary: Budget allocations vs actuals
+      parameters:
+        - name: budgetId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allocations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        categoryId: { type: string, format: uuid }
+                        limitAmount: { type: integer }
+                        actualAmount: { type: integer }
+                        remainingAmount: { type: integer }
+                  summary:
+                    type: object
+                    properties:
+                      totalLimit: { type: integer }
+                      totalActual: { type: integer }
+                      totalRemaining: { type: integer }

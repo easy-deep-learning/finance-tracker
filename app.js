@@ -336,6 +336,58 @@
     renderSettings();
   }
 
+  // ---------------------- Auth & Sync ----------------------
+  async function fetchJSON(url, opts){
+    const res = await fetch(url, { credentials: 'include', headers: { 'Content-Type': 'application/json' }, ...opts });
+    if(!res.ok) return null;
+    return await res.json();
+  }
+
+  async function refreshUserBox(){
+    try{
+      const data = await fetchJSON('/me');
+      const authBox = byId('auth-box');
+      if(!authBox) return;
+      const btnLogin = byId('btn-login');
+      const userBox = byId('user-box');
+      if(data && data.user){
+        btnLogin.classList.add('hidden');
+        userBox.classList.remove('hidden');
+        byId('user-name').textContent = data.user.name || data.user.email || 'User';
+        const pic = byId('user-pic');
+        if(data.user.picture){ pic.src = data.user.picture; pic.alt = data.user.name || ''; }
+        // try to pull server state and merge
+        const srv = await fetchJSON('/api/state');
+        if(srv && srv.state){
+          // naive merge: prefer server as source of truth
+          const local = JSON.stringify(state);
+          const remote = JSON.stringify(srv.state);
+          if(local !== remote){
+            Object.assign(state, srv.state);
+            save();
+            renderAll();
+          }
+        } else {
+          // push local to server initially
+          await fetchJSON('/api/state', { method:'POST', body: JSON.stringify({ state }) });
+        }
+      } else {
+        btnLogin.classList.remove('hidden');
+        userBox.classList.add('hidden');
+      }
+    } catch {}
+  }
+
+  function initAuthUi(){
+    const logoutBtn = byId('btn-logout');
+    if(logoutBtn){
+      logoutBtn.addEventListener('click', async ()=>{
+        try{ await fetchJSON('/auth/logout', { method:'POST' }); } finally { location.reload(); }
+      });
+    }
+    refreshUserBox();
+  }
+
   // ---------------------- Helpers (DOM) ----------------------
   function byId(id){ return document.getElementById(id); }
   function on(el, ev, selOrHandler, handler){
@@ -589,6 +641,7 @@
   // ---------------------- Bootstrap ----------------------
   function main(){
     load();
+    initAuthUi();
     initNav();
     initForms();
     renderAll();

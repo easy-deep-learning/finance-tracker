@@ -27,6 +27,10 @@ body{
 .nav{display:flex; gap:6px; flex-wrap:wrap}
 .nav-link{background:transparent; color:var(--text); border:1px solid transparent; padding:8px 10px; border-radius:8px; cursor:pointer}
 .nav-link.active, .nav-link:hover{background:var(--panel); border-color:var(--border)}
+.auth-box{display:flex; align-items:center; gap:10px}
+.user-box{display:flex; align-items:center; gap:8px}
+.user-box img{width:28px; height:28px; border-radius:50%; border:1px solid var(--border); background:#000}
+.hidden{display:none}
 
 main{padding:20px 0 48px}
 .section{display:none}

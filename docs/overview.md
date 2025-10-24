@@ -1,40 +1,40 @@
-# Project overview
+# Обзор проекта
 
-Finance Tracker helps people track income and expenses, plan and analyze spending, set savings goals, and be reminded of upcoming events (e.g., birthdays and holidays) and recurring payments.
+Finance Tracker помогает людям вести учёт доходов и расходов, планировать и анализировать траты, ставить цели по накоплениям и получать напоминания о предстоящих событиях (например, днях рождения и праздниках) и регулярных платежах.
 
-The initial product goals (from `README.md`):
-- Daily budget tracking
-- Calculations relative to income date(s)
-- Debts (given/received) with schedules
-- Recurring/mandatory payments
-- Payment schedules for debts
-- Available credit tracking
-- Savings formation and progress tracking
+Исходные цели продукта (из `README.md`):
+- Ежедневное отслеживание бюджета
+- Расчёты относительно даты(дат) поступления дохода
+- Долги (дал/взял) с графиками
+- Регулярные/обязательные платежи
+- Графики платежей по долгам
+- Учёт доступных кредитных средств
+- Формирование и отслеживание накоплений
 
-## Core capabilities
-- Record transactions (income, expense, transfer) per account and category
-- Categorize spending and analyze by time window
-- Define budgets by period and allocate per category
-- Create recurring items that auto-generate planned or actual transactions
-- Track debts and repayments with amortization and reminders
-- Track credit facilities and available credit vs. limits
-- Create and track savings goals with forecasts
-- Maintain a calendar of events that may affect spending
+## Основные возможности
+- Фиксация транзакций (доход, расход, перевод) по счёту и категории
+- Категоризация трат и анализ по временным окнам
+- Определение бюджетов по периодам и распределение по категориям
+- Создание регулярных элементов, автоматически формирующих плановые или фактические транзакции
+- Учёт долгов и платежей с амортизацией и напоминаниями
+- Учёт кредитных линий и доступного лимита
+- Создание целей по накоплениям с прогнозами
+- Ведение календаря событий, влияющих на расходы
 
-## Non-functional baseline
-- Security: token-based auth (JWT), per-user data isolation
-- Data integrity: typed entities with validation; idempotency for creation
-- Observability: request IDs, structured error responses
-- Internationalization: currency-aware formatting, time zones
-- Extensibility: event-driven hooks for scheduled operations (cron/queue)
+## Нефункциональные требования (база)
+- Безопасность: токенная аутентификация (JWT), изоляция данных по пользователю
+- Целостность данных: типизированные сущности с валидацией; идемпотентность создания
+- Наблюдаемость: идентификаторы запросов, структурированные ошибки
+- Интернационализация: валютные форматы, часовые пояса
+- Расширяемость: событийные хуки для плановых операций (cron/очередь)
 
-## Glossary
-- Account: a money container (cash, bank, card, etc.)
-- Category: a label to classify transactions; income or expense type
-- Transaction: a money movement (income/expense/transfer)
-- Budget: planned allocations per period and category
-- Recurring: scheduled income/expense definition
-- Debt: money lent or borrowed with a payment plan
-- Credit facility: a line of credit with a limit and cycle
-- Saving goal: a target amount to accumulate by a date
-- Event: a calendar item that may imply planned spending
+## Глоссарий
+- Счёт: контейнер для денег (наличные, банк, карта и т.п.)
+- Категория: метка для классификации транзакций; тип дохода или расхода
+- Транзакция: движение денег (доход/расход/перевод)
+- Бюджет: плановые распределения по периоду и категории
+- Регулярная операция: расписание дохода/расхода
+- Долг: занятые или одолженные средства с планом платежей
+- Кредитная линия: кредитный лимит с циклом
+- Цель накопления: целевая сумма к дате
+- Событие: календарная запись, влияющая на планируемые траты

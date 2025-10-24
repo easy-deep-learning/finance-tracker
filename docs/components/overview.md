@@ -1,48 +1,48 @@
-# Components (planned)
+# Компоненты (план)
 
-No UI components are present in the repository yet. This section outlines a proposed component architecture for a future web app (React-like), to be refined when implementation starts.
+В репозитории пока нет UI‑компонентов. Этот раздел описывает предлагаемую архитектуру компонентов будущего веб‑приложения (в стиле React), которая будет уточнена при старте реализации.
 
-## Layout and navigation
-- AppShell: header, sidebar, content area
-- NavMenu: sections (Dashboard, Transactions, Budgets, Debts, Goals, Settings)
+## Компоновка и навигация
+- AppShell: шапка, боковая панель, область контента
+- NavMenu: разделы (Панель, Транзакции, Бюджеты, Долги, Цели, Настройки)
 
-## Dashboard
+## Панель
 - BalanceSummaryCard
 - CashflowChart
 - UpcomingEventsList
 - BudgetProgressList
 
-## Transactions
-- TransactionList (virtualized)
-- TransactionFilters (date, account, category, amount)
-- TransactionForm (create/edit income|expense|transfer)
+## Транзакции
+- TransactionList (виртуализированный)
+- TransactionFilters (дата, счёт, категория, сумма)
+- TransactionForm (создание/редактирование доход|расход|перевод)
 - CategoryBadge
 - AccountSelector
 
-## Budgets
+## Бюджеты
 - BudgetOverview
-- BudgetEditor (allocations per category)
+- BudgetEditor (распределения по категориям)
 - BudgetProgressBar
 
-## Recurring & calendar
+## Регулярные операции и календарь
 - RecurringList
 - RecurringEditor
-- CalendarView (events, due dates)
+- CalendarView (события, даты платежей)
 
-## Debts & credit
+## Долги и кредит
 - DebtList
-- DebtDetail (amortization table)
+- DebtDetail (таблица амортизации)
 - CreditFacilityCard
 
-## Savings
+## Накопления
 - SavingGoalsList
 - SavingGoalEditor
 - SavingsProjectionChart
 
-## Shared
-- MoneyInput (minor units, currency-aware)
-- DateTimePicker (TZ-safe)
+## Общие компоненты
+- MoneyInput (минорные единицы, учёт валюты)
+- DateTimePicker (корректная работа с часовыми поясами)
 - TagInput
 - ConfirmDialog
 
-Document each component with: props, state, events, and examples. Replace this file with concrete docs once components exist.
+Документируйте каждый компонент: пропсы, состояние, события и примеры. Замените этот файл конкретной документацией, когда компоненты появятся.

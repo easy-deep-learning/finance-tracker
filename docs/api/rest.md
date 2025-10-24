@@ -1,33 +1,33 @@
-# REST API guide
+# Руководство по REST API
 
-This guide describes the REST conventions for the Finance Tracker API and provides usage examples.
+В этом руководстве описаны конвенции REST для API Finance Tracker и приводятся примеры использования.
 
-Base URL: `https://api.example.com`
+Базовый URL: `https://api.example.com`
 
-## Authentication
-- Scheme: Bearer token (JWT)
-- Include: `Authorization: Bearer <token>` header
-- Obtain a token via `POST /auth/login` or `POST /auth/register`
+## Аутентификация
+- Схема: Bearer токен (JWT)
+- Добавляйте заголовок: `Authorization: Bearer <token>`
+- Получение токена через `POST /auth/login` или `POST /auth/register`
 
-## Versioning
-- Path-based: `/v1/...` in production (omitted here for brevity)
+## Версионирование
+- В продакшне — префикс пути: `/v1/...` (для краткости здесь опущено)
 
-## Common headers
-- `Idempotency-Key`: optional, recommended for POST to prevent duplicates
-- `X-Request-Id`: optional client-supplied correlation ID
+## Общие заголовки
+- `Idempotency-Key`: необязателен, рекомендуется для POST для предотвращения дубликатов
+- `X-Request-Id`: необязательный корреляционный ID клиента
 - `Content-Type: application/json`
 
-## Pagination
-- Cursor-based via `?limit` and `?cursor`
-- Response includes `meta`: `{ nextCursor, prevCursor, total? }`
+## Пагинация
+- На курсорах через `?limit` и `?cursor`
+- В ответе поле `meta`: `{ nextCursor, prevCursor, total? }`
 
-## Filtering & sorting
-- Date range: `?from=YYYY-MM-DD&to=YYYY-MM-DD`
-- Category: `?categoryId=...`
-- Account: `?accountId=...`
-- Sort: `?sort=occurredAt:desc,amount:asc`
+## Фильтрация и сортировка
+- Диапазон дат: `?from=YYYY-MM-DD&to=YYYY-MM-DD`
+- Категория: `?categoryId=...`
+- Счёт: `?accountId=...`
+- Сортировка: `?sort=occurredAt:desc,amount:asc`
 
-## Error format
+## Формат ошибки
 ```json
 {
   "error": {
@@ -38,9 +38,9 @@ Base URL: `https://api.example.com`
 }
 ```
 
-## Examples
+## Примеры
 
-### Register and login
+### Регистрация и вход
 ```bash
 curl -X POST https://api.example.com/auth/register \
   -H 'Content-Type: application/json' \
@@ -50,12 +50,12 @@ curl -X POST https://api.example.com/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"demo@example.com","password":"Str0ng!Pass"}'
 ```
-Response:
+Ответ:
 ```json
 {"accessToken":"<JWT>","user":{"id":"...","email":"demo@example.com"}}
 ```
 
-### Create an account
+### Создание счёта
 ```bash
 curl -X POST https://api.example.com/accounts \
   -H 'Authorization: Bearer <JWT>' \
@@ -63,7 +63,7 @@ curl -X POST https://api.example.com/accounts \
   -d '{"name":"Main Card","type":"card","currency":"USD"}'
 ```
 
-### Create categories
+### Создание категорий
 ```bash
 curl -X POST https://api.example.com/categories \
   -H 'Authorization: Bearer <JWT>' \
@@ -76,9 +76,9 @@ curl -X POST https://api.example.com/categories \
   -d '{"name":"Groceries","type":"expense"}'
 ```
 
-### Record income and expense
+### Запись дохода и расхода
 ```bash
-# Income
+# Доход
 curl -X POST https://api.example.com/transactions \
   -H 'Authorization: Bearer <JWT>' \
   -H 'Content-Type: application/json' \
@@ -92,7 +92,7 @@ curl -X POST https://api.example.com/transactions \
     "notes":"October salary"
   }'
 
-# Expense
+# Расход
 curl -X POST https://api.example.com/transactions \
   -H 'Authorization: Bearer <JWT>' \
   -H 'Content-Type: application/json' \
@@ -107,15 +107,15 @@ curl -X POST https://api.example.com/transactions \
   }'
 ```
 
-### List transactions
+### Список транзакций
 ```bash
 curl -X GET 'https://api.example.com/transactions?from=2025-10-01&to=2025-10-31&limit=50' \
   -H 'Authorization: Bearer <JWT>'
 ```
 
-## Idempotency
-- Provide a unique `Idempotency-Key` for POST requests you might retry.
-- Server returns the same result for duplicates within a 24h window.
+## Идемпотентность
+- Передавайте уникальный `Idempotency-Key` для POST‑запросов, которые могут быть повторены.
+- Сервер возвращает тот же результат для дубликатов в течение 24 часов.
 
-## Rate limiting
-- 60 req/min default; `429` with `Retry-After` on exceed.
+## Лимитирование
+- По умолчанию 60 запросов/мин; при превышении — `429` с `Retry-After`.

@@ -1,8 +1,8 @@
-# Example: Debts and repayment schedule
+# Пример: Долги и график погашения
 
-This example walks through setting up a borrowed debt and scheduling repayments.
+Этот пример демонстрирует настройку долга (задолженности) и план погашений.
 
-## 1. Create a debt
+## 1. Создайте долг
 ```bash
 curl -X POST https://api.example.com/debts -H 'Authorization: Bearer <JWT>' -H 'Content-Type: application/json' -d '{
   "role":"borrowed",
@@ -13,7 +13,7 @@ curl -X POST https://api.example.com/debts -H 'Authorization: Bearer <JWT>' -H '
 }'
 ```
 
-## 2. Add a payment
+## 2. Добавьте платёж
 ```bash
 curl -X POST https://api.example.com/debts/<debtId>/payments -H 'Authorization: Bearer <JWT>' -H 'Content-Type: application/json' -d '{
   "amount":45000,
@@ -21,7 +21,7 @@ curl -X POST https://api.example.com/debts/<debtId>/payments -H 'Authorization: 
 }'
 ```
 
-## 3. List payments
+## 3. Список платежей
 ```bash
 curl -X GET https://api.example.com/debts/<debtId>/payments -H 'Authorization: Bearer <JWT>'
 ```

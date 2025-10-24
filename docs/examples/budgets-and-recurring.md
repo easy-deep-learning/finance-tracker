@@ -1,8 +1,8 @@
-# Example: Budgets with rollover and recurring transactions
+# Пример: Бюджеты с переносом остатков и регулярные транзакции
 
-This example demonstrates budget rollover and automatic transaction generation from recurring items.
+Этот пример демонстрирует перенос остатков бюджета и автоматическую генерацию транзакций из регулярных элементов.
 
-## 1. Create a budget with rollover
+## 1. Создайте бюджет с переносом остатков
 ```bash
 curl -X POST https://api.example.com/budgets -H 'Authorization: Bearer <JWT>' -H 'Content-Type: application/json' -d '{
   "period":"monthly",
@@ -12,7 +12,7 @@ curl -X POST https://api.example.com/budgets -H 'Authorization: Bearer <JWT>' -H
 }'
 ```
 
-## 2. Set up recurring groceries top-up (weekly)
+## 2. Настройте регулярное пополнение на продукты (еженедельно)
 ```bash
 curl -X POST https://api.example.com/recurring -H 'Authorization: Bearer <JWT>' -H 'Content-Type: application/json' -d '{
   "type":"expense",
@@ -24,12 +24,12 @@ curl -X POST https://api.example.com/recurring -H 'Authorization: Bearer <JWT>' 
 }'
 ```
 
-## 3. Run the recurring generator for this week
+## 3. Запустите генерацию регулярных на текущую неделю
 ```bash
 curl -X POST https://api.example.com/recurring/<recurringId>/run -H 'Authorization: Bearer <JWT>'
 ```
 
-## 4. Check budget performance
+## 4. Проверьте эффективность бюджета
 ```bash
 curl -X GET 'https://api.example.com/reports/budget-performance?budgetId=<budgetId>' -H 'Authorization: Bearer <JWT>'
 ```

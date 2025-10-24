@@ -1,45 +1,45 @@
-# Functions and services
+# Функции и сервисы
 
-Because the repository currently contains no implementation code, this document specifies the core domain services and algorithms expected in the Finance Tracker backend. When the implementation begins, replace the pseudo-code with concrete references to modules and functions.
+Поскольку в репозитории пока нет реализационного кода, этот документ описывает ключевые доменные сервисы и алгоритмы, ожидаемые в бэкенде Finance Tracker. Когда начнётся реализация, замените псевдокод конкретными ссылками на модули и функции.
 
-## Money utilities
-- parseMoney(input: string|number, currency: string) -> minor units
-- formatMoney(minor: number, currency: string) -> string
-- convertCurrency(amountMinor: number, from: string, to: string, rate: number) -> number
+## Денежные утилиты
+- parseMoney(input: string|number, currency: string) -> сумма в минорных единицах
+- formatMoney(minor: number, currency: string) -> строка
+- convertCurrency(amountMinor: number, from: string, to: string, rate: number) -> число
 
-## Transactions
+## Транзакции
 - createTransaction(input) -> Transaction
-  - Validates account/category, type-specific constraints
-  - For transfer: create two legs with fee handling
+  - Валидирует счёт/категорию и ограничения по типу
+  - Для перевода: создаёт две проводки с учётом комиссии
 - listTransactions(filters) -> { data, meta }
 - summarizeTransactionsByDay(range, filters) -> { byDay }
 - summarizeTransactionsByCategory(range, filters) -> { byCategory }
 
-## Budgets
+## Бюджеты
 - createBudget(definition) -> Budget
 - computeBudgetPerformance(budgetId) -> { allocations, summary }
 - rolloverBudget(previousBudgetId) -> Budget
 
-## Recurring items
+## Регулярные элементы
 - scheduleToDates(schedule, start, end) -> Date[]
-- generateTransactionsForRecurring(recurringItem, atDate) -> Transaction[] (idempotent)
+- generateTransactionsForRecurring(recurringItem, atDate) -> Transaction[] (идемпотентно)
 
-## Debts
+## Долги
 - createDebt(definition) -> Debt
 - amortizationSchedule(principalMinor, apr, frequency, startDate, nPayments?) -> Payment[]
 - applyDebtPayment(debtId, payment) -> { updatedDebt, entry }
 
-## Credit facilities
+## Кредитные продукты
 - computeAvailableCredit(limitMinor, postedMinor, pendingMinor) -> number
 - statementPeriod(date, statementDay) -> { start, end }
 
-## Savings
+## Накопления
 - projectSavings(currentMinor, monthlyContributionMinor, targetMinor, apr?, horizonMonths?) -> Projection
 
-## Events
+## События
 - upcomingEvents(range) -> Event[]
 
-## Pseudo-code examples
+## Примеры псевдокода
 
 ```pseudo
 function computeBudgetPerformance(budgetId):
@@ -74,7 +74,7 @@ function amortizationSchedule(principal, apr, frequency, startDate, nPayments):
     interest = round(balance * r)
     principalPortion = payment - interest
     balance = balance - principalPortion
-    date = addMonths(date, 1)  // if monthly
+    date = addMonths(date, 1)  // если помесячно
     schedule.push({ amount: payment, interestPortion: interest, principalPortion, date })
   return schedule
 ```
